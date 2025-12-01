@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইসলাম ও বিশ্ব সমস্যা - ইন্টারঅ্যাকটিভ অ্যাসাইনমেন্ট</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts for Bengali -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #fafaf9; /* stone-50 */
+            color: #1c1917; /* stone-900 */
+        }
+        
+        /* Chart Container Styling Rules */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-wrapper {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
+        }
+
+        .tab-active {
+            border-bottom: 3px solid #059669; /* emerald-600 */
+            color: #059669;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 3px solid transparent;
+            color: #57534e; /* stone-600 */
+        }
+        .tab-inactive:hover {
+            color: #059669;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Islamic Emerald Green and Crisis Red accents -->
+    <!-- Application Structure Plan: A tab-based SPA dashboard. 
+         - 'Overview': Summary and student info.
+         - 'Salat': Interactive accordion for rules and conditions to simplify the list-heavy content.
+         - 'Zakat': Visualizations (Pie Chart) for the 8 sectors and comparative cards for economic impact.
+         - 'Sawm': Concept cards for Taqwa and conditions.
+         - 'Palestine Crisis': Vertical timeline for history and action checklist for solutions.
+         This structure breaks the long report into digestible, thematic modules for better cognitive load management. -->
+    <!-- Visualization & Content Choices:
+         - Zakat Sectors -> Goal: Organize/Inform -> Pie Chart -> To visually show the distribution categories defined in Quran.
+         - Conflict History -> Goal: Change/Time -> Vertical Timeline -> To map the progression from 1917 to present.
+         - Economic Impact -> Goal: Inform -> Data Cards -> To highlight poverty alleviation points.
+         - Rulers' Role -> Goal: Analysis -> Accordion -> To allow users to expand/collapse complex political critiques.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 min-h-screen flex flex-col">
+
+    <!-- Header / Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-emerald-700">ইসলাম ও বিশ্ব সমস্যা</span>
+                </div>
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="navigate('home')" id="nav-home" class="tab-active px-1 pt-1 text-lg transition duration-150 ease-in-out">হোম</button>
+                    <button onclick="navigate('salat')" id="nav-salat" class="tab-inactive px-1 pt-1 text-lg transition duration-150 ease-in-out">সালাত</button>
+                    <button onclick="navigate('zakat')" id="nav-zakat" class="tab-inactive px-1 pt-1 text-lg transition duration-150 ease-in-out">যাকাত</button>
+                    <button onclick="navigate('sawm')" id="nav-sawm" class="tab-inactive px-1 pt-1 text-lg transition duration-150 ease-in-out">সাওম</button>
+                    <button onclick="navigate('palestine')" id="nav-palestine" class="tab-inactive px-1 pt-1 text-lg transition duration-150 ease-in-out text-red-600 hover:text-red-700">ফিলিস্তিন সংকট</button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-stone-600 hover:text-emerald-600 focus:outline-none">
+                        <span class="text-3xl">☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Nav Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-stone-200">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="navigate('home'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-emerald-700 hover:bg-stone-50">হোম</button>
+                <button onclick="navigate('salat'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-emerald-700 hover:bg-stone-50">সালাত</button>
+                <button onclick="navigate('zakat'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-emerald-700 hover:bg-stone-50">যাকাত</button>
+                <button onclick="navigate('sawm'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-emerald-700 hover:bg-stone-50">সাওম</button>
+                <button onclick="navigate('palestine'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-800 hover:bg-red-50">ফিলিস্তিন সংকট</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="app-container" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Views will be injected here via JS -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-800 text-stone-300 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm">অ্যাসাইনমেন্ট জমাদানের শেষ তারিখ: ০৭ ডিসেম্বর ২০২৫</p>
+            <p class="text-xs mt-2 text-stone-500">উৎস: আল-কুরআন, হাদিস, ও সমসাময়িক প্রতিবেদন</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data Store ---
+        const appData = {
+            studentInfo: {
+                title: "ইসলামের মৌলিক ইবাদত এবং চলমান ফিলিস্তিন-ইসরায়েল সংঘাতের প্রেক্ষাপটে মুসলিম উম্মাহর দায়বদ্ধতা",
+                subject: "ইসলামি জীবন দর্শন ও সমাজ",
+                session: "২০২৪-২০২৫"
+            },
+            salat: {
+                definition: "সালাত ইসলামের দ্বিতীয় স্তম্ভ। এটি আল্লাহর সাথে বান্দার আধ্যাত্মিক সংযোগ স্থাপনের মাধ্যম।",
+                conditions: [
+                    { title: "মুসলিম হওয়া", desc: "সালাত কেবল মুসলিমদের ওপর ফরজ।" },
+                    { title: "বালেগ হওয়া", desc: "প্রাপ্তবয়স্ক হওয়ার পর সালাত ফরজ হয়।" },
+                    { title: "বিবেকবান হওয়া", desc: "মানসিক ভারসাম্যহীন ব্যক্তির ওপর সালাত ফরজ নয়।" }
+                ],
+                nullifiers: [
+                    "কথাবার্তা বলা", "সালাম দেওয়া/নেওয়া", "আমলে কাসীর (অতিরিক্ত নড়াচড়া)", "ওযু বা পবিত্রতা নষ্ট হওয়া",
+                    "ক্বিবলা থেকে বুক ঘুরে যাওয়া", "সশব্দে হাসা", "পানাহার করা", "সতর খুলে যাওয়া",
+                    "ইমামের আগে রুকন করা", "দুনিয়ার উদ্দেশ্যে দোয়া করা"
+                ]
+            },
+            zakat: {
+                sectors: [
+                    "দরিদ্র (আল-ফুকারা)", "অভাবগ্রস্ত (আল-মাসাকীন)", "যাকাত কর্মী", "মন জয় করা (মুআল্লাফাতু ক্বুলুব)",
+                    "দাসমুক্তি", "ঋণগ্রস্ত", "আল্লাহর পথে (জিহাদ)", "মুসাফির"
+                ],
+                nisab: [
+                    { item: "স্বর্ণ", amount: "৭.৫ তোলা (৮৫ গ্রাম)" },
+                    { item: "রৌপ্য", amount: "৫২.৫ তোলা (৫৯৫ গ্রাম)" }
+                ]
+            },
+            palestine: {
+                timeline: [
+                    { year: "১৯১৭", event: "বেলফোর ঘোষণা", desc: "ফিলিস্তিনে ইহুদি আবাসভূমির প্রতিশ্রুতি।" },
+                    { year: "১৯৪৮", event: "ইসরায়েল রাষ্ট্র প্রতিষ্ঠা (নাকবা)", desc: "হাজার হাজার ফিলিস্তিনি বিতাড়িত।" },
+                    { year: "১৯৬৭", event: "ছয় দিনের যুদ্ধ (নাকসা)", desc: "পশ্চিম তীর, গাজা ও জেরুজালেম দখল।" },
+                    { year: "২০২৪-বর্তমান", event: "গাজা সংকট", desc: "মানবিক বিপর্যয় ও নির্বিচার হামলা।" }
+                ]
+            }
+        };
+
+        // --- State Management ---
+        let currentView = 'home';
+        let charts = {}; // Store chart instances
+
+        // --- Navigation Logic ---
+        function navigate(view) {
+            currentView = view;
+            
+            // Update Tab Styles
+            const tabs = ['home', 'salat', 'zakat', 'sawm', 'palestine'];
+            tabs.forEach(tab => {
+                const el = document.getElementById(`nav-${tab}`);
+                if(el) {
+                    if (tab === view) {
+                        el.classList.remove('tab-inactive');
+                        el.classList.add('tab-active');
+                    } else {
+                        el.classList.remove('tab-active');
+                        el.classList.add('tab-inactive');
+                    }
+                }
+            });
+
+            // Render Content
+            const container = document.getElementById('app-container');
+            container.innerHTML = ''; // Clear current content
+            container.classList.remove('fade-in');
+            void container.offsetWidth; // Trigger reflow
+            container.classList.add('fade-in');
+
+            switch(view) {
+                case 'home': renderHome(container); break;
+                case 'salat': renderSalat(container); break;
+                case 'zakat': renderZakat(container); break;
+                case 'sawm': renderSawm(container); break;
+                case 'palestine': renderPalestine(container); break;
+            }
+
+            // Re-render charts if needed
+            if (view === 'zakat') initZakatChart();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Render Functions ---
+
+        function renderHome(container) {
+            container.innerHTML = `
+                <div class="text-center py-10">
+                    <h1 class="text-3xl md:text-5xl font-bold text-stone-800 mb-6 leading-tight">${appData.studentInfo.title}</h1>
+                    <div class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto border-l-4 border-emerald-500">
+                        <p class="text-lg text-stone-600 mb-2"><strong>বিষয়:</strong> ${appData.studentInfo.subject}</p>
+                        <p class="text-lg text-stone-600 mb-2"><strong>শিক্ষাবর্ষ:</strong> ${appData.studentInfo.session}</p>
+                        <p class="text-sm text-stone-400 mt-4">এই ইন্টারঅ্যাকটিভ অ্যাপ্লিকেশনের মাধ্যমে সালাত, যাকাত, সাওম এবং ফিলিস্তিন সংকটের বিস্তারিত তথ্য উপস্থাপন করা হয়েছে। নেভিগেশন মেনু ব্যবহার করে বিস্তারিত দেখুন।</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                        <div onclick="navigate('salat')" class="cursor-pointer bg-emerald-50 hover:bg-emerald-100 p-6 rounded-xl transition shadow-sm hover:shadow-md border border-emerald-100">
+                            <div class="text-4xl mb-2">🕌</div>
+                            <h3 class="text-xl font-bold text-emerald-800">সালাত</h3>
+                            <p class="text-stone-600 text-sm">দৈনিক পাঁচ ওয়াক্ত প্রার্থনা ও তার বিধান।</p>
+                        </div>
+                        <div onclick="navigate('zakat')" class="cursor-pointer bg-yellow-50 hover:bg-yellow-100 p-6 rounded-xl transition shadow-sm hover:shadow-md border border-yellow-100">
+                            <div class="text-4xl mb-2">💰</div>
+                            <h3 class="text-xl font-bold text-yellow-800">যাকাত</h3>
+                            <p class="text-stone-600 text-sm">অর্থনৈতিক ভারসাম্য ও দারিদ্র্য বিমোচন।</p>
+                        </div>
+                        <div onclick="navigate('sawm')" class="cursor-pointer bg-sky-50 hover:bg-sky-100 p-6 rounded-xl transition shadow-sm hover:shadow-md border border-sky-100">
+                            <div class="text-4xl mb-2">🌙</div>
+                            <h3 class="text-xl font-bold text-sky-800">সাওম</h3>
+                            <p class="text-stone-600 text-sm">আত্মশুদ্ধি ও তাকওয়া অর্জনের মাধ্যম।</p>
+                        </div>
+                        <div onclick="navigate('palestine')" class="cursor-pointer bg-red-50 hover:bg-red-100 p-6 rounded-xl transition shadow-sm hover:shadow-md border border-red-100">
+                            <div class="text-4xl mb-2">🇵🇸</div>
+                            <h3 class="text-xl font-bold text-red-800">ফিলিস্তিন সংকট</h3>
+                            <p class="text-stone-600 text-sm">ঐতিহাসিক প্রেক্ষাপট ও আমাদের করণীয়।</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSalat(container) {
+            container.innerHTML = `
+                <div class="space-y-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h2 class="text-2xl font-bold text-emerald-800 mb-4 border-b pb-2">সালাত: পরিচিতি ও গুরুত্ব</h2>
+                        <p class="text-stone-700 leading-relaxed mb-4">
+                            সালাত (নামাজ) ইসলামের পাঁচটি মূল স্তম্ভের মধ্যে শাহাদাতের পরেই সর্বাপেক্ষা গুরুত্বপূর্ণ। এটি দৈনিক পাঁচবার নির্দিষ্ট সময়ে আদায় করা বাধ্যতামূলক। কুরআনে ৮২ বারের বেশি সালাতের কথা বলা হয়েছে।
+                        </p>
+                        <blockquote class="bg-emerald-50 p-4 rounded-r-lg border-l-4 border-emerald-600 italic text-stone-700">
+                            “নিশ্চয়ই সালাত অশ্লীল ও গর্হিত কাজ থেকে বিরত রাখে।” (আল-কুরআন)
+                        </blockquote>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Conditions (Ahkam) -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-800 mb-4 flex items-center"><span class="bg-emerald-100 text-emerald-600 p-2 rounded-full mr-2 text-sm">শর্ত</span> সালাত ফরজের শর্তাবলি</h3>
+                            <div class="space-y-3">
+                                ${appData.salat.conditions.map(c => `
+                                    <div class="group border border-stone-200 rounded-lg p-3 hover:bg-stone-50 transition">
+                                        <h4 class="font-semibold text-emerald-700">${c.title}</h4>
+                                        <p class="text-sm text-stone-600">${c.desc}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Nullifiers (Bhangar Karon) -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center"><span class="bg-red-100 text-red-600 p-2 rounded-full mr-2 text-sm">সতর্কতা</span> সালাত ভঙ্গের কারণসমূহ</h3>
+                            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${appData.salat.nullifiers.map((n, i) => `
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 font-bold mr-2">${i+1}.</span>
+                                        <span class="text-stone-700 text-sm">${n}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-stone-800 text-white p-6 rounded-lg shadow-md text-center">
+                        <p class="text-lg">সালাত কেবল ইবাদত নয়, এটি শৃঙ্খলার উত্তম প্রশিক্ষণ।</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderZakat(container) {
+            container.innerHTML = `
+                <div class="space-y-8">
+                    <!-- Intro -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h2 class="text-2xl font-bold text-yellow-700 mb-4 border-b pb-2">যাকাত: অর্থনৈতিক ভারসাম্য</h2>
+                        <p class="text-stone-700 leading-relaxed">
+                            যাকাত ইসলামের তৃতীয় স্তম্ভ। এটি ধনীদের সম্পদে গরীবের অধিকার। সূরা আত-তাওবার ৬০ নম্বর আয়াতে যাকাতের ৮টি নির্দিষ্ট খাতের বর্ণনা দেওয়া হয়েছে। এর মূল লক্ষ্য দারিদ্র্য বিমোচন ও সম্পদ পবিত্র করা।
+                        </p>
+                    </div>
+
+                    <!-- Chart & Table Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        <!-- Chart Section -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm flex flex-col items-center">
+                            <h3 class="text-lg font-bold text-stone-800 mb-4">যাকাতের ৮টি খাত (সূরা আত-তাওবা: ৬০)</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="zakatChart"></canvas>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-4 text-center">এই খাতগুলোর বাইরে যাকাত প্রদান করা যায় না।</p>
+                        </div>
+
+                        <!-- Nisab Section -->
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-bold text-stone-800 mb-4">নিসাব (সর্বনিম্ন সম্পদ সীমা)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-left text-sm">
+                                    <thead class="bg-stone-100">
+                                        <tr>
+                                            <th class="p-3 text-stone-600 font-bold">সম্পদের ধরন</th>
+                                            <th class="p-3 text-stone-600 font-bold">পরিমাণ</th>
+                                            <th class="p-3 text-stone-600 font-bold">হার</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-stone-100">
+                                        <tr>
+                                            <td class="p-3 font-medium">স্বর্ণ</td>
+                                            <td class="p-3">৭.৫ তোলা (৮৫ গ্রাম)</td>
+                                            <td class="p-3 row-span-3 align-middle bg-stone-50" rowspan="3">২.৫%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 font-medium">রৌপ্য</td>
+                                            <td class="p-3">৫২.৫ তোলা (৫৯৫ গ্রাম)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-3 font-medium">নগদ/ব্যবসা</td>
+                                            <td class="p-3">রৌপ্যের সমমূল্য</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-6 bg-yellow-50 p-4 rounded-lg">
+                                <h4 class="font-bold text-yellow-800 mb-2">অর্থনৈতিক গুরুত্ব</h4>
+                                <ul class="list-disc list-inside text-sm text-stone-700 space-y-1">
+                                    <li>সম্পদের আবর্তন নিশ্চিত করে।</li>
+                                    <li>ধনী-গরিবের বৈষম্য হ্রাস করে।</li>
+                                    <li>সামাজিক নিরাপত্তা বেষ্টনী তৈরি করে।</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSawm(container) {
+            container.innerHTML = `
+                <div class="space-y-8">
+                    <!-- Intro -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h2 class="text-2xl font-bold text-sky-700 mb-4 border-b pb-2">সাওম: তাকওয়া ও আত্মশুদ্ধি</h2>
+                        <p class="text-stone-700 leading-relaxed">
+                            সাওম (রোজা) হিজরি রমজান মাসে সুবহে সাদিক থেকে সূর্যাস্ত পর্যন্ত পানাহার ও পাপাচার থেকে বিরত থাকা। এর মূল উদ্দেশ্য 'তাকওয়া' বা আল্লাহভীতি অর্জন।
+                        </p>
+                    </div>
+
+                    <!-- Purpose Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-sky-500 hover:-translate-y-1 transition duration-300">
+                            <h3 class="font-bold text-lg mb-2 text-stone-800">আত্মসংযম</h3>
+                            <p class="text-sm text-stone-600">প্রবৃত্তির ওপর নিয়ন্ত্রণ প্রতিষ্ঠা করা এবং হারাম কাজ থেকে বিরত থাকার মানসিক শক্তি অর্জন।</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-sky-500 hover:-translate-y-1 transition duration-300">
+                            <h3 class="font-bold text-lg mb-2 text-stone-800">সহমর্মিতা</h3>
+                            <p class="text-sm text-stone-600">ক্ষুধার্ত ও দরিদ্র মানুষের কষ্ট অনুধাবন করা, যা সামাজিক দায়িত্ববোধ জাগ্রত করে।</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-sm border-t-4 border-sky-500 hover:-translate-y-1 transition duration-300">
+                            <h3 class="font-bold text-lg mb-2 text-stone-800">স্বাস্থ্য</h3>
+                            <p class="text-sm text-stone-600">পরিপাকতন্ত্রকে বিশ্রাম দেওয়া এবং মানসিক ফোকাস বৃদ্ধি করা।</p>
+                        </div>
+                    </div>
+
+                    <!-- Condition Checklist -->
+                    <div class="bg-sky-50 p-6 rounded-lg shadow-inner">
+                        <h3 class="text-xl font-bold text-sky-800 mb-4">কার ওপর ফরজ?</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-4 py-2 bg-white rounded-full text-sky-700 text-sm font-semibold shadow-sm">মুসলিম</span>
+                            <span class="px-4 py-2 bg-white rounded-full text-sky-700 text-sm font-semibold shadow-sm">প্রাপ্তবয়স্ক</span>
+                            <span class="px-4 py-2 bg-white rounded-full text-sky-700 text-sm font-semibold shadow-sm">সুস্থ</span>
+                            <span class="px-4 py-2 bg-white rounded-full text-sky-700 text-sm font-semibold shadow-sm">মুক্বীম (অ-মুসাফির)</span>
+                            <span class="px-4 py-2 bg-white rounded-full text-sky-700 text-sm font-semibold shadow-sm">নারীদের পবিত্রতা</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPalestine(container) {
+            container.innerHTML = `
+                <div class="space-y-8">
+                    <!-- Intro -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-600">
+                        <h2 class="text-2xl font-bold text-red-700 mb-4">ফিলিস্তিন-ইসরায়েল সংঘাত ও দায়বদ্ধতা</h2>
+                        <p class="text-stone-700 leading-relaxed">
+                            আল-আকসা মুসলমানদের প্রথম কিবলা। ১৯৪৮ সালে ইসরায়েল রাষ্ট্র প্রতিষ্ঠার পর থেকে ফিলিস্তিনিরা তাদের ভূমি হারিয়েছে। বর্তমান গাজা পরিস্থিতি এক চরম মানবিক বিপর্যয়।
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Timeline -->
+                        <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-bold text-stone-800 mb-6">ঐতিহাসিক প্রেক্ষাপট</h3>
+                            <div class="relative border-l-2 border-red-200 ml-3 space-y-8">
+                                ${appData.palestine.timeline.map(item => `
+                                    <div class="mb-8 ml-6 relative">
+                                        <span class="absolute -left-9 top-1 w-6 h-6 bg-red-100 rounded-full border-2 border-red-500 flex items-center justify-center text-[10px] text-red-600">●</span>
+                                        <h4 class="font-bold text-stone-800">${item.year}</h4>
+                                        <h5 class="text-red-700 font-semibold text-sm">${item.event}</h5>
+                                        <p class="text-xs text-stone-500 mt-1">${item.desc}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Role & Action -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Rulers Role -->
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                <h3 class="text-xl font-bold text-stone-800 mb-4">মুসলিম শাসকদের ভূমিকা (পর্যালোচনা)</h3>
+                                <div class="space-y-3 text-stone-700 text-sm">
+                                    <div class="p-3 bg-stone-50 rounded border-l-2 border-stone-400">
+                                        <strong>ঐক্যের অভাব:</strong> অধিকাংশ নেতা শক্তিশালী অবস্থান নিতে ব্যর্থ হয়েছেন।
+                                    </div>
+                                    <div class="p-3 bg-stone-50 rounded border-l-2 border-stone-400">
+                                        <strong>স্বাভাবিকীকরণ:</strong> আব্রাহাম চুক্তির মাধ্যমে কিছু দেশ ইসরায়েলের সাথে সম্পর্ক গড়েছে, যা ফিলিস্তিনিদের দুর্বল করেছে।
+                                    </div>
+                                    <div class="p-3 bg-emerald-50 rounded border-l-2 border-emerald-500 mt-4">
+                                        <strong>প্রয়োজনীয় পদক্ষেপ:</strong> ঐক্যবদ্ধ কূটনৈতিক চাপ, অর্থনৈতিক অবরোধ, এবং মানবিক করিডোর স্থাপন।
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ummah Action Plan -->
+                            <div class="bg-red-50 p-6 rounded-lg shadow-sm">
+                                <h3 class="text-xl font-bold text-red-800 mb-4">উম্মাহর করণীয়</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-200 flex items-center justify-center text-red-700 font-bold text-xs mt-0.5">১</div>
+                                        <p class="ml-3 text-sm text-stone-700">জনমত সৃষ্টি ও সচেতনতা বৃদ্ধি (সোশ্যাল মিডিয়া)।</p>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-200 flex items-center justify-center text-red-700 font-bold text-xs mt-0.5">২</div>
+                                        <p class="ml-3 text-sm text-stone-700">নিরবচ্ছিন্ন মানবিক ও আর্থিক সাহায্য প্রদান।</p>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-200 flex items-center justify-center text-red-700 font-bold text-xs mt-0.5">৩</div>
+                                        <p class="ml-3 text-sm text-stone-700">ইসরায়েল সমর্থনকারী পণ্য বর্জন (BDS)।</p>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 h-6 w-6 rounded-full bg-red-200 flex items-center justify-center text-red-700 font-bold text-xs mt-0.5">৪</div>
+                                        <p class="ml-3 text-sm text-stone-700">মজলুমদের জন্য নিয়মিত দোয়া ও ইবাদত।</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Chart Initialization ---
+
+        function initZakatChart() {
+            const ctx = document.getElementById('zakatChart');
+            if (!ctx) return;
+
+            // Destroy existing chart if present
+            if (charts.zakat) {
+                charts.zakat.destroy();
+            }
+
+            charts.zakat = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: appData.zakat.sectors,
+                    datasets: [{
+                        label: 'যাকাতের খাত',
+                        data: [12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5], // Equal distribution for visualization
+                        backgroundColor: [
+                            '#059669', '#10b981', '#34d399', '#6ee7b7',
+                            '#047857', '#065f46', '#064e3b', '#a7f3d0'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Vital for the container constraints
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Hind Siliguri', sans-serif"
+                                },
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            navigate('home');
+        });
+
+    </script>
+</body>
+</html>
